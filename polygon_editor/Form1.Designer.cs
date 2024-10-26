@@ -91,7 +91,7 @@
             // 
             // verticesTextBox
             // 
-            verticesTextBox.Location = new Point(6, 534);
+            verticesTextBox.Location = new Point(6, 63);
             verticesTextBox.Name = "verticesTextBox";
             verticesTextBox.Size = new Size(206, 27);
             verticesTextBox.TabIndex = 15;
@@ -117,7 +117,7 @@
             // algorithmLabel
             // 
             algorithmLabel.AutoSize = true;
-            algorithmLabel.Location = new Point(6, 451);
+            algorithmLabel.Location = new Point(6, 492);
             algorithmLabel.Name = "algorithmLabel";
             algorithmLabel.Size = new Size(127, 20);
             algorithmLabel.TabIndex = 12;
@@ -126,7 +126,7 @@
             // bresenhamButton
             // 
             bresenhamButton.AutoSize = true;
-            bresenhamButton.Location = new Point(6, 504);
+            bresenhamButton.Location = new Point(6, 545);
             bresenhamButton.Name = "bresenhamButton";
             bresenhamButton.Size = new Size(172, 24);
             bresenhamButton.TabIndex = 11;
@@ -137,7 +137,7 @@
             // libraryButton
             // 
             libraryButton.AutoSize = true;
-            libraryButton.Location = new Point(6, 474);
+            libraryButton.Location = new Point(6, 515);
             libraryButton.Name = "libraryButton";
             libraryButton.Size = new Size(144, 24);
             libraryButton.TabIndex = 10;
@@ -158,23 +158,24 @@
             // 
             // removeRelationButton
             // 
-            removeRelationButton.Location = new Point(6, 305);
+            removeRelationButton.Location = new Point(6, 444);
             removeRelationButton.Name = "removeRelationButton";
             removeRelationButton.Size = new Size(206, 29);
             removeRelationButton.TabIndex = 8;
             removeRelationButton.Text = "Remove relation";
             removeRelationButton.UseVisualStyleBackColor = true;
+            removeRelationButton.Click += removeRelationButton_Click;
             // 
             // lengthTextBox
             // 
-            lengthTextBox.Location = new Point(6, 272);
+            lengthTextBox.Location = new Point(6, 307);
             lengthTextBox.Name = "lengthTextBox";
             lengthTextBox.Size = new Size(206, 27);
             lengthTextBox.TabIndex = 7;
             // 
             // edgeLengthButton
             // 
-            edgeLengthButton.Location = new Point(6, 237);
+            edgeLengthButton.Location = new Point(6, 272);
             edgeLengthButton.Name = "edgeLengthButton";
             edgeLengthButton.Size = new Size(206, 29);
             edgeLengthButton.TabIndex = 6;
@@ -183,7 +184,7 @@
             // 
             // verticalEdgeButton
             // 
-            verticalEdgeButton.Location = new Point(6, 202);
+            verticalEdgeButton.Location = new Point(6, 237);
             verticalEdgeButton.Name = "verticalEdgeButton";
             verticalEdgeButton.Size = new Size(206, 29);
             verticalEdgeButton.TabIndex = 5;
@@ -192,7 +193,7 @@
             // 
             // horizontalEdgeButton
             // 
-            horizontalEdgeButton.Location = new Point(6, 167);
+            horizontalEdgeButton.Location = new Point(6, 202);
             horizontalEdgeButton.Name = "horizontalEdgeButton";
             horizontalEdgeButton.Size = new Size(206, 29);
             horizontalEdgeButton.TabIndex = 4;
@@ -201,7 +202,7 @@
             // 
             // addVertexButton
             // 
-            addVertexButton.Location = new Point(6, 96);
+            addVertexButton.Location = new Point(6, 131);
             addVertexButton.Name = "addVertexButton";
             addVertexButton.Size = new Size(206, 29);
             addVertexButton.TabIndex = 3;
@@ -211,7 +212,7 @@
             // 
             // removeVertexButton
             // 
-            removeVertexButton.Location = new Point(6, 131);
+            removeVertexButton.Location = new Point(6, 166);
             removeVertexButton.Name = "removeVertexButton";
             removeVertexButton.Size = new Size(206, 30);
             removeVertexButton.TabIndex = 2;
@@ -221,7 +222,7 @@
             // 
             // removePolygonButton
             // 
-            removePolygonButton.Location = new Point(6, 61);
+            removePolygonButton.Location = new Point(6, 96);
             removePolygonButton.Name = "removePolygonButton";
             removePolygonButton.Size = new Size(206, 29);
             removePolygonButton.TabIndex = 1;

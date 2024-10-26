@@ -14,6 +14,8 @@ namespace polygon_editor
         public Vertex? ControlPointNext = null;
         public Vertex Prev = null;
         public Vertex Next = null;
+        public Relation? NextRelation = null;
+        public Relation? PrevRelation = null;
 
         public int X { get => Point.X; set => this.Point.X = value; }
         public int Y { get => Point.Y; set => this.Point.Y = value; }

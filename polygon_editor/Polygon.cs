@@ -13,17 +13,18 @@ namespace polygon_editor
         public Point recent;
         public Vertex clickedVertex = null;
         //public bool IsMoving = false;
-        //public Point recent;
         public bool IsLibrary = true;
         public bool IsEdgeSelected = false;
         public (Vertex, Vertex) clickedEdge;
         public List<Vertex> Vertices { get; set; }
         public List<(Vertex, Vertex)> ControlPoints { get; set; }
+        public List<Relation> Relations { get; set; }
 
         public Polygon()
         {
             Vertices = new List<Vertex>();
             ControlPoints = new List<(Vertex, Vertex)>();
+            Relations = new List<Relation>();
         }
 
         public void AddVertex(Vertex vertex)
@@ -136,33 +137,42 @@ namespace polygon_editor
                 }
             }
 
-            foreach (Vertex vertex in Vertices)
-            {
-                e.Graphics.FillEllipse(Brushes.Black, vertex.X - 5, vertex.Y - 5, 10, 10);
-                //FillCircleOnBitmap(vertex.X, vertex.Y, 5, Color.Black, BM);
-            }
+
             List<Vertex> FillVertices = new List<Vertex>(Vertices);
+            foreach ((Vertex, Vertex) points in ControlPoints)
+            {               
+                Bezier(BM, points.Item1.ControlPointPrev.Point, points.Item1.Point, points.Item2.Point, points.Item2.ControlPointNext.Point, out List<Vertex> FillingBezier);
+                FillVertices.InsertRange(FillVertices.IndexOf(points.Item2.ControlPointNext), FillingBezier);          
+                for (int i = 0; i < FillingBezier.Count - 1; i++)
+                {
+                    Vertex v1 = FillingBezier[i];
+                    Vertex v2 = FillingBezier[i + 1];
+                    if (IsLibrary)
+                        e.Graphics.DrawLine(pen, v1.Point, v2.Point);
+                    else
+                        Bresenham(BM, v1, v2, Color.Black);
+                }
+            }
+
+            e.Graphics.FillPolygon(Brushes.LightGray, FillVertices.Select(v => v.Point).ToArray());
+
             foreach ((Vertex, Vertex) points in ControlPoints)
             {
                 e.Graphics.FillEllipse(Brushes.Gray, points.Item1.X - 5, points.Item1.Y - 5, 10, 10);
                 e.Graphics.FillEllipse(Brushes.Gray, points.Item2.X - 5, points.Item2.Y - 5, 10, 10);
-                //FillCircleOnBitmap(points.Item1.X, points.Item1.Y, 5, Color.Gray, BM);
-                //FillCircleOnBitmap(points.Item2.X, points.Item1.Y, 5, Color.Gray, BM);
-                //e.Graphics.DrawBezier(pen, points.Item1.ControlPointPrev.Point, points.Item1.Point, points.Item2.Point, points.Item2.ControlPointNext.Point);
-                Bezier(BM, points.Item1.ControlPointPrev.Point, points.Item1.Point, points.Item2.Point, points.Item2.ControlPointNext.Point, out List<Vertex> FillingBezier);
-                FillVertices.InsertRange(FillVertices.IndexOf(points.Item2.ControlPointNext), FillingBezier);
-                e.Graphics.DrawPolygon(dottedpen, new Point[] { points.Item1.ControlPointPrev.Point, points.Item1.Point, points.Item2.Point, points.Item2.ControlPointNext.Point });
+                e.Graphics.DrawPolygon(dottedpen, new Point[] { points.Item1.ControlPointPrev.Point, points.Item1.Point,
+                    points.Item2.Point, points.Item2.ControlPointNext.Point });
+            }
+
+            foreach (Vertex vertex in Vertices)
+            {
+                e.Graphics.FillEllipse(Brushes.Black, vertex.X - 5, vertex.Y - 5, 10, 10);
             }
 
             if (clickedVertex != null)
             {
                 e.Graphics.FillEllipse(Brushes.Red, clickedVertex.X - 5, clickedVertex.Y - 5, 10, 10);
-                //FillCircleOnBitmap(clickedvertex.X, clickedvertex.Y, 5, Color.Red, BM);
             }
-
-            //e.Graphics.FillPolygon(Brushes.LightGray, Vertices.Select(v => v.Point).ToArray());
-            //e.Graphics.FillPolygon(Brushes.LightGray, FillVertices.Select(v => v.Point).ToArray());
-            FillPolygonOnBitmap(FillVertices.Select(v => v.Point).ToArray(), BM);
         }
 
         private void FillCircleOnBitmap(int cx, int cy, int radius, Color fillColor, Bitmap bitmap)
@@ -244,26 +254,45 @@ namespace polygon_editor
         public void Bezier(Bitmap BM, Point point1, Point point2, Point point3, Point point4, out List<Vertex> FillingBezier)
         {
             FillingBezier = new List<Vertex>();
-            for (float t = 0; t <= 1; t += 0.005f)
+            for (float t = 0; t <= 1; t += 0.01f)
             {
                 PointF point = GetBezierPoint(t, point1, point2, point3, point4);
-                if (point.X >= 0 && point.X < BM.Width && point.Y >= 0 && point.Y < BM.Height) BM.SetPixel((int)point.X, (int)point.Y, Color.Black);
-                if (t % 0.02 < 10e-3) { FillingBezier.Add(new Vertex((int)point.X, (int)point.Y)); }
+                if (point.X >= 0 && point.X < BM.Width && point.Y >= 0 && point.Y < BM.Height)
+                {
+                    BM.SetPixel((int)point.X, (int)point.Y, Color.Black);
+                    FillingBezier.Add(new Vertex((int)point.X, (int)point.Y));
+                }
             }
         }
         private PointF GetBezierPoint(float t, PointF P0, PointF P1, PointF P2, PointF P3)
         {
-            float x = (float)(Math.Pow(1 - t, 3) * P0.X +
-                              3 * Math.Pow(1 - t, 2) * t * P1.X +
-                              3 * (1 - t) * Math.Pow(t, 2) * P2.X +
-                              Math.Pow(t, 3) * P3.X);
 
-            float y = (float)(Math.Pow(1 - t, 3) * P0.Y +
-                              3 * Math.Pow(1 - t, 2) * t * P1.Y +
-                              3 * (1 - t) * Math.Pow(t, 2) * P2.Y +
-                              Math.Pow(t, 3) * P3.Y);
+            float oneMinusT = 1 - t;
 
-            return new PointF(x, y);
+            PointF A = new PointF(oneMinusT * P0.X + t * P1.X, oneMinusT * P0.Y + t * P1.Y);
+            PointF B = new PointF(oneMinusT * P1.X + t * P2.X, oneMinusT * P1.Y + t * P2.Y);
+            PointF C = new PointF(oneMinusT * P2.X + t * P3.X, oneMinusT * P2.Y + t * P3.Y);
+
+            PointF D = new PointF(oneMinusT * A.X + t * B.X, oneMinusT * A.Y + t * B.Y);
+            PointF E = new PointF(oneMinusT * B.X + t * C.X, oneMinusT * B.Y + t * C.Y);
+
+            return new PointF(oneMinusT * D.X + t * E.X, oneMinusT * D.Y + t * E.Y);
+
+            //float oneMinusT = 1 - t;
+            //float oneMinusTSquared = oneMinusT * oneMinusT;
+            //float tSquared = t * t;
+
+            //float x = oneMinusTSquared * oneMinusT * P0.X +
+            //          3 * oneMinusTSquared * t * P1.X +
+            //          3 * oneMinusT * tSquared * P2.X +
+            //          tSquared * t * P3.X;
+
+            //float y = oneMinusTSquared * oneMinusT * P0.Y +
+            //          3 * oneMinusTSquared * t * P1.Y +
+            //          3 * oneMinusT * tSquared * P2.Y +
+            //          tSquared * t * P3.Y;
+
+            //return new PointF(x, y);
         }
         public Vertex GetVertexAt(Point point)
         {
@@ -361,14 +390,20 @@ namespace polygon_editor
 
         public bool IsInside(Point p)
         {
-            int n = Vertices.Count;
+            List<Vertex> allVertices = new List<Vertex>(Vertices);
+            foreach ((Vertex, Vertex) points in ControlPoints)
+            {
+                allVertices.Insert(allVertices.IndexOf(points.Item2.ControlPointNext), points.Item2);
+                allVertices.Insert(allVertices.IndexOf(points.Item2), points.Item1);
+            }
+            int n = allVertices.Count;
             double[] x = new double[n];
             double[] y = new double[n];
             int i, j;
             for (i = 0; i < n; i++)
             {
-                x[i] = Vertices[i].X;
-                y[i] = Vertices[i].Y;
+                x[i] = allVertices[i].X;
+                y[i] = allVertices[i].Y;
             }
             bool c = false;
             for (i = 0, j = n - 1; i < n; j = i++)
@@ -381,6 +416,23 @@ namespace polygon_editor
                 }
             }
             return c;
+        }
+
+        public void RemoveControlPoints(Vertex v1)
+        {
+            if (v1.ControlPointPrev != null)
+            {
+                ControlPoints.Remove((v1.ControlPointPrev, v1));
+                v1.ControlPointPrev.ControlPointPrev.ControlPointNext = null;
+                v1.ControlPointNext.ControlPointPrev = null;
+            }
+            else
+            {
+                ControlPoints.Remove((v1, v1.ControlPointNext));
+                v1.ControlPointNext.ControlPointNext.ControlPointPrev = null;
+                v1.ControlPointPrev.ControlPointNext = null;
+            }
+            clickedVertex = null;
         }
     }
 }

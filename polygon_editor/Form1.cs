@@ -211,5 +211,21 @@ namespace polygon_editor
                 picture.Invalidate();
             }
         }
+
+        private void removeRelationButton_Click(object sender, EventArgs e)
+        {
+            if (polygon == null)
+            {
+                return;
+            }
+            if (polygon.clickedVertex != null)
+            {
+                if (polygon.clickedVertex.IsControlPoint)
+                {
+                    polygon.RemoveControlPoints(polygon.clickedVertex);
+                    picture.Invalidate();
+                }
+            }
+        }
     }
 }
