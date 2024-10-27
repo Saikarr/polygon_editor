@@ -54,6 +54,16 @@ namespace polygon_editor
                 ControlPoints.Remove((vertex.ControlPointNext, vertex.ControlPointNext.ControlPointNext));
                 vertex.ControlPointNext = null;
             }
+            if (vertex.NextRelation != null)
+            {
+                vertex.Next.PrevRelation = null;
+                Relations.Remove(vertex.NextRelation);
+            }
+            if (vertex.PrevRelation != null)
+            {
+                vertex.Prev.NextRelation = null;
+                Relations.Remove(vertex.PrevRelation);
+            }
             vertex.Prev.Next = vertex.Next;
             vertex.Next.Prev = vertex.Prev;
             Vertices.Remove(vertex);
@@ -140,9 +150,9 @@ namespace polygon_editor
 
             List<Vertex> FillVertices = new List<Vertex>(Vertices);
             foreach ((Vertex, Vertex) points in ControlPoints)
-            {               
+            {
                 Bezier(BM, points.Item1.ControlPointPrev.Point, points.Item1.Point, points.Item2.Point, points.Item2.ControlPointNext.Point, out List<Vertex> FillingBezier);
-                FillVertices.InsertRange(FillVertices.IndexOf(points.Item2.ControlPointNext), FillingBezier);          
+                FillVertices.InsertRange(FillVertices.IndexOf(points.Item2.ControlPointNext), FillingBezier);
                 for (int i = 0; i < FillingBezier.Count - 1; i++)
                 {
                     Vertex v1 = FillingBezier[i];
@@ -172,6 +182,11 @@ namespace polygon_editor
             if (clickedVertex != null)
             {
                 e.Graphics.FillEllipse(Brushes.Red, clickedVertex.X - 5, clickedVertex.Y - 5, 10, 10);
+            }
+
+            foreach (Relation relation in Relations)
+            {
+                relation.Draw(e);
             }
         }
 
@@ -370,6 +385,12 @@ namespace polygon_editor
             v.Next = v2;
             v1.Next = v;
             v2.Prev = v;
+            if (v1.NextRelation != null)
+            {
+                Relations.Remove(v1.NextRelation);
+                v1.NextRelation = null;
+                v2.PrevRelation = null;
+            }
             Vertices.Insert(Vertices.IndexOf(v2), v);
         }
 
@@ -408,9 +429,7 @@ namespace polygon_editor
             bool c = false;
             for (i = 0, j = n - 1; i < n; j = i++)
             {
-                if (((y[i] > p.Y) != (y[j] > p.Y)) &&
-                                       (p.X < (x[j] - x[i]) * (p.Y - y[i]) / (y[j] - y[i]) + x[i])
-                                                      )
+                if (((y[i] > p.Y) != (y[j] > p.Y)) && (p.X < (x[j] - x[i]) * (p.Y - y[i]) / (y[j] - y[i]) + x[i]))
                 {
                     c = !c;
                 }

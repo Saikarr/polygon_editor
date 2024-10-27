@@ -70,6 +70,27 @@ namespace polygon_editor
             {
                 polygon.clickedVertex.X = e.X;
                 polygon.clickedVertex.Y = e.Y;
+                Stack<(Relation, Vertex)> relationsStack = new Stack<(Relation, Vertex)>();
+                if (polygon.clickedVertex.NextRelation != null)
+                {
+                    relationsStack.Push((polygon.clickedVertex.NextRelation, polygon.clickedVertex));
+                }
+                if (polygon.clickedVertex.PrevRelation != null)
+                {
+                    relationsStack.Push((polygon.clickedVertex.PrevRelation, polygon.clickedVertex));
+                }
+                if (polygon.clickedVertex.IsControlPoint)
+                {
+                    if (!polygon.clickedVertex.ControlPointPrev.IsControlPoint && polygon.clickedVertex.ControlPointPrev.PrevRelation != null)
+                    {
+                        relationsStack.Push((polygon.clickedVertex.ControlPointPrev.PrevRelation, polygon.clickedVertex.ControlPointPrev));
+                    }
+                    else if (!polygon.clickedVertex.ControlPointNext.IsControlPoint && polygon.clickedVertex.ControlPointNext.NextRelation != null)
+                    {
+                        relationsStack.Push((polygon.clickedVertex.ControlPointNext.NextRelation, polygon.clickedVertex.ControlPointNext));
+                    }
+                }
+                Relation.FixRelationsStack(relationsStack);
                 picture.Invalidate();
             }
             else if (IsMovingPolygon == true)
@@ -121,6 +142,7 @@ namespace polygon_editor
                         polygon.clickedEdge = (polygon.Vertices[i], polygon.Vertices[(i + 1) % polygon.Vertices.Count]);
                         //polygon.clickedEdge = clickedEdge;
                         polygon.IsEdgeSelected = true;
+                        lengthTextBox.Text = polygon.clickedEdge.Item1.DistanceTo(polygon.clickedEdge.Item2).ToString();
                         picture.Invalidate();
                         return;
                     }
@@ -225,6 +247,163 @@ namespace polygon_editor
                     polygon.RemoveControlPoints(polygon.clickedVertex);
                     picture.Invalidate();
                 }
+            }
+            else if (polygon.IsEdgeSelected)
+            {
+                if (polygon.clickedEdge.Item1.NextRelation != null)
+                {
+                    polygon.Relations.Remove(polygon.clickedEdge.Item1.NextRelation);
+                    polygon.clickedEdge.Item1.NextRelation = null;
+                }
+                if (polygon.clickedEdge.Item2.PrevRelation != null)
+                {
+                    polygon.Relations.Remove(polygon.clickedEdge.Item2.PrevRelation);
+                    polygon.clickedEdge.Item2.PrevRelation = null;
+                }
+                polygon.IsEdgeSelected = false;
+                picture.Invalidate();
+            }
+        }
+
+        private void horizontalEdgeButton_Click(object sender, EventArgs e)
+        {
+            if (polygon == null)
+            {
+                return;
+            }
+            if (polygon.IsEdgeSelected)
+            {
+                if (polygon.clickedEdge.Item1.NextRelation != null ||
+                    (polygon.clickedEdge.Item1.PrevRelation != null && polygon.clickedEdge.Item1.PrevRelation.GetType() == typeof(HorizontalRelation)) ||
+                    (polygon.clickedEdge.Item2.NextRelation != null && polygon.clickedEdge.Item2.NextRelation.GetType() == typeof(HorizontalRelation)))
+                {
+                    MessageBox.Show("cannot do that");
+                    return;
+                }
+                HorizontalRelation relation = new HorizontalRelation(polygon.clickedEdge.Item1, polygon.clickedEdge.Item2);
+                polygon.clickedEdge.Item1.NextRelation = relation;
+                polygon.clickedEdge.Item2.PrevRelation = relation;
+                polygon.IsEdgeSelected = false;
+                polygon.Relations.Add(relation);
+                relation.CreateRelation();
+                picture.Invalidate();
+            }
+        }
+
+        private void verticalEdgeButton_Click(object sender, EventArgs e)
+        {
+            if (polygon == null)
+            {
+                return;
+            }
+
+            if (polygon.IsEdgeSelected)
+            {
+                if (polygon.clickedEdge.Item1.NextRelation != null ||
+                   (polygon.clickedEdge.Item1.PrevRelation != null && polygon.clickedEdge.Item1.PrevRelation.GetType() == typeof(VerticalRelation)) ||
+                   (polygon.clickedEdge.Item2.NextRelation != null && polygon.clickedEdge.Item2.NextRelation.GetType() == typeof(VerticalRelation)))
+                {
+                    MessageBox.Show("cannot do that");
+                    return;
+                }
+                VerticalRelation relation = new VerticalRelation(polygon.clickedEdge.Item1, polygon.clickedEdge.Item2);
+                polygon.clickedEdge.Item1.NextRelation = relation;
+                polygon.clickedEdge.Item2.PrevRelation = relation;
+                polygon.IsEdgeSelected = false;
+                polygon.Relations.Add(relation);
+                relation.CreateRelation();
+                picture.Invalidate();
+            }
+        }
+
+        private void edgeLengthButton_Click(object sender, EventArgs e)
+        {
+            if (polygon == null)
+            {
+                return;
+            }
+            if (polygon.IsEdgeSelected)
+            {
+                if (polygon.clickedEdge.Item1.NextRelation != null)
+                {
+                    MessageBox.Show("cannot do that");
+                    return;
+                }
+                LengthRelation relation = new LengthRelation(polygon.clickedEdge.Item1, polygon.clickedEdge.Item2, Convert.ToDouble(lengthTextBox.Text));
+                polygon.clickedEdge.Item1.NextRelation = relation;
+                polygon.clickedEdge.Item2.PrevRelation = relation;
+                polygon.IsEdgeSelected = false;
+                polygon.Relations.Add(relation);
+                relation.CreateRelation();
+                picture.Invalidate();
+            }
+        }
+
+        private void g1Button_Click(object sender, EventArgs e)
+        {
+            if (polygon == null)
+            {
+                return;
+            }
+            if (polygon.clickedVertex != null && (polygon.clickedVertex.ControlPointNext != null || polygon.clickedVertex.ControlPointPrev != null))
+            {
+                //if (polygon.clickedEdge.Item1.NextRelation != null)
+                //{
+                //    MessageBox.Show("cannot do that");
+                //    return;
+                //}
+                if (polygon.clickedVertex.ControlPointNext != null)
+                {
+                    G1Continuity relation = new G1Continuity(polygon.clickedVertex, polygon.clickedVertex.Prev);
+                    polygon.clickedVertex.PrevRelation = relation;
+                    polygon.clickedVertex.Prev.NextRelation = relation;
+                    polygon.Relations.Add(relation);
+                    relation.CreateRelation();
+                }
+                else
+                {
+                    G1Continuity relation = new G1Continuity(polygon.clickedVertex, polygon.clickedVertex.Next);
+                    polygon.clickedVertex.NextRelation = relation;
+                    polygon.clickedVertex.Next.PrevRelation = relation;
+                    polygon.Relations.Add(relation);
+                    relation.CreateRelation();
+                }
+
+                picture.Invalidate();
+            }
+        }
+
+        private void c1button_Click(object sender, EventArgs e)
+        {
+            if (polygon == null)
+            {
+                return;
+            }
+            if (polygon.clickedVertex != null && (polygon.clickedVertex.ControlPointNext != null || polygon.clickedVertex.ControlPointPrev != null))
+            {
+                //if (polygon.clickedEdge.Item1.NextRelation != null)
+                //{
+                //    MessageBox.Show("cannot do that");
+                //    return;
+                //}
+                if (polygon.clickedVertex.ControlPointNext != null)
+                {
+                    C1Continuity relation = new C1Continuity(polygon.clickedVertex, polygon.clickedVertex.Prev);
+                    polygon.clickedVertex.PrevRelation = relation;
+                    polygon.clickedVertex.Prev.NextRelation = relation;
+                    polygon.Relations.Add(relation);
+                    relation.CreateRelation();
+                }
+                else
+                {
+                    C1Continuity relation = new C1Continuity(polygon.clickedVertex, polygon.clickedVertex.Next);
+                    polygon.clickedVertex.NextRelation = relation;
+                    polygon.clickedVertex.Next.PrevRelation = relation;
+                    polygon.Relations.Add(relation);
+                    relation.CreateRelation();
+                }
+
+                picture.Invalidate();
             }
         }
     }

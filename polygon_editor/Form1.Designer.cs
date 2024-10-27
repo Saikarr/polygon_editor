@@ -104,6 +104,7 @@
             c1button.TabIndex = 14;
             c1button.Text = "C1 continuity";
             c1button.UseVisualStyleBackColor = true;
+            c1button.Click += c1button_Click;
             // 
             // g1Button
             // 
@@ -113,6 +114,7 @@
             g1Button.TabIndex = 13;
             g1Button.Text = "G1 continuity";
             g1Button.UseVisualStyleBackColor = true;
+            g1Button.Click += g1Button_Click;
             // 
             // algorithmLabel
             // 
@@ -181,6 +183,7 @@
             edgeLengthButton.TabIndex = 6;
             edgeLengthButton.Text = "Define edge length";
             edgeLengthButton.UseVisualStyleBackColor = true;
+            edgeLengthButton.Click += edgeLengthButton_Click;
             // 
             // verticalEdgeButton
             // 
@@ -190,6 +193,7 @@
             verticalEdgeButton.TabIndex = 5;
             verticalEdgeButton.Text = "Vertical edge";
             verticalEdgeButton.UseVisualStyleBackColor = true;
+            verticalEdgeButton.Click += verticalEdgeButton_Click;
             // 
             // horizontalEdgeButton
             // 
@@ -199,6 +203,7 @@
             horizontalEdgeButton.TabIndex = 4;
             horizontalEdgeButton.Text = "Horizontal edge";
             horizontalEdgeButton.UseVisualStyleBackColor = true;
+            horizontalEdgeButton.Click += horizontalEdgeButton_Click;
             // 
             // addVertexButton
             // 
