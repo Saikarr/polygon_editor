@@ -19,6 +19,13 @@ namespace polygon_editor
         }
         public override void UpdateRelation(Vertex movingVertex, Stack<(Relation, Vertex)> relationsStack)
         {
+            //if (Vertex1.ControlPointNext != null && Vertex1.ControlPointPrev != null)
+            //{
+            //    int dx = Vertex1.ControlPointNext.X - Vertex1.X;
+            //    int dy = Vertex1.ControlPointNext.Y - Vertex1.Y;
+            //    Vertex1.ControlPointPrev.X = Vertex1.X - dx;
+            //    Vertex1.ControlPointPrev.Y = Vertex1.Y - dy;
+            //}
             Vertex otherVertex = movingVertex == Vertex1 ? Vertex2 : Vertex1;
             Vertex controlPoint = Vertex1.ControlPointNext ?? Vertex1.ControlPointPrev;
 

@@ -439,7 +439,7 @@ namespace polygon_editor
 
         public void RemoveControlPoints(Vertex v1)
         {
-            if (v1.ControlPointPrev != null)
+            if (v1.ControlPointPrev.IsControlPoint)
             {
                 ControlPoints.Remove((v1.ControlPointPrev, v1));
                 v1.ControlPointPrev.ControlPointPrev.ControlPointNext = null;
