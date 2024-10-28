@@ -4,7 +4,7 @@ namespace polygon_editor
 {
     public partial class Form1 : Form
     {
-        Polygon? polygon = null;
+        public Polygon? polygon = null;
         //Vertex clickedVertex;
         //(Vertex, Vertex) clickedEdge;
         bool IsMovingVertex = false;
@@ -19,11 +19,24 @@ namespace polygon_editor
         {
             polygon = new Polygon();
             libraryButton.Checked = true;
-
-            polygon.AddVertex(new Vertex(100, 100));
-            polygon.AddVertex(new Vertex(200, 100));
-            polygon.AddVertex(new Vertex(200, 200));
-            polygon.AddVertex(new Vertex(100, 200));
+            int n = 9;
+            for (int i = 0; i < n; i++)
+            {
+                polygon.AddVertex(new Vertex((int)(300 + 100 * Math.Cos(2 * Math.PI * i / n)), (int)(300 + 100 * Math.Sin(2 * Math.PI * i / n))));
+            }
+            polygon.IsEdgeSelected = true;
+            polygon.clickedEdge = (polygon.Vertices[0], polygon.Vertices[1]);
+            horizontalEdgeButton_Click(null, null);
+            polygon.IsEdgeSelected = true;
+            polygon.clickedEdge = (polygon.Vertices[1], polygon.Vertices[2]);
+            verticalEdgeButton_Click(null, null);
+            polygon.IsEdgeSelected = true;
+            polygon.clickedEdge = (polygon.Vertices[3], polygon.Vertices[4]);
+            bezierButton_Click(null, null);
+            polygon.IsEdgeSelected = true;
+            polygon.clickedEdge = (polygon.Vertices[5], polygon.Vertices[6]);
+            lengthTextBox.Text = polygon.clickedEdge.Item1.DistanceTo(polygon.clickedEdge.Item2).ToString();
+            edgeLengthButton_Click(null, null);
         }
 
         private void picture_Paint(object sender, PaintEventArgs e)
@@ -90,7 +103,7 @@ namespace polygon_editor
                         relationsStack.Push((polygon.clickedVertex.ControlPointNext.NextRelation, polygon.clickedVertex.ControlPointNext));
                     }
                 }
-                Relation.FixRelationsStack(relationsStack);
+                Relation.FixRelationsStack(relationsStack, polygon);
                 picture.Invalidate();
             }
             else if (IsMovingPolygon == true)
@@ -230,6 +243,10 @@ namespace polygon_editor
             {
                 polygon.AddControlPoints(polygon.clickedEdge.Item1, polygon.clickedEdge.Item2);
                 polygon.IsEdgeSelected = false;
+                polygon.clickedVertex = polygon.clickedEdge.Item1;
+                g1Button_Click(sender, e);
+                polygon.clickedVertex = polygon.clickedEdge.Item2;
+                g1Button_Click(sender, e);
                 picture.Invalidate();
             }
         }
@@ -285,7 +302,7 @@ namespace polygon_editor
                 polygon.clickedEdge.Item2.PrevRelation = relation;
                 polygon.IsEdgeSelected = false;
                 polygon.Relations.Add(relation);
-                relation.CreateRelation();
+                relation.CreateRelation(polygon);
                 picture.Invalidate();
             }
         }
@@ -311,7 +328,7 @@ namespace polygon_editor
                 polygon.clickedEdge.Item2.PrevRelation = relation;
                 polygon.IsEdgeSelected = false;
                 polygon.Relations.Add(relation);
-                relation.CreateRelation();
+                relation.CreateRelation(polygon);
                 picture.Invalidate();
             }
         }
@@ -334,7 +351,7 @@ namespace polygon_editor
                 polygon.clickedEdge.Item2.PrevRelation = relation;
                 polygon.IsEdgeSelected = false;
                 polygon.Relations.Add(relation);
-                relation.CreateRelation();
+                relation.CreateRelation(polygon);
                 picture.Invalidate();
             }
         }
@@ -347,26 +364,35 @@ namespace polygon_editor
             }
             if (polygon.clickedVertex != null && (polygon.clickedVertex.ControlPointNext != null || polygon.clickedVertex.ControlPointPrev != null))
             {
-                //if (polygon.clickedEdge.Item1.NextRelation != null)
-                //{
-                //    MessageBox.Show("cannot do that");
-                //    return;
-                //}
                 if (polygon.clickedVertex.ControlPointNext != null)
                 {
+                    if (polygon.clickedVertex.PrevRelation != null)
+                    {
+                        if (polygon.clickedVertex.PrevRelation.GetType() != typeof(C1Continuity))
+                            return;
+                        else
+                            polygon.Relations.Remove(polygon.clickedVertex.PrevRelation);
+                    }
                     G1Continuity relation = new G1Continuity(polygon.clickedVertex, polygon.clickedVertex.Prev);
                     polygon.clickedVertex.PrevRelation = relation;
                     polygon.clickedVertex.Prev.NextRelation = relation;
                     polygon.Relations.Add(relation);
-                    relation.CreateRelation();
+                    relation.CreateRelation(polygon);
                 }
                 else
                 {
+                    if (polygon.clickedVertex.NextRelation != null)
+                    {
+                        if (polygon.clickedVertex.NextRelation.GetType() != typeof(C1Continuity))
+                            return;
+                        else
+                            polygon.Relations.Remove(polygon.clickedVertex.NextRelation);
+                    }
                     G1Continuity relation = new G1Continuity(polygon.clickedVertex, polygon.clickedVertex.Next);
                     polygon.clickedVertex.NextRelation = relation;
                     polygon.clickedVertex.Next.PrevRelation = relation;
                     polygon.Relations.Add(relation);
-                    relation.CreateRelation();
+                    relation.CreateRelation(polygon);
                 }
 
                 picture.Invalidate();
@@ -381,26 +407,35 @@ namespace polygon_editor
             }
             if (polygon.clickedVertex != null && (polygon.clickedVertex.ControlPointNext != null || polygon.clickedVertex.ControlPointPrev != null))
             {
-                //if (polygon.clickedEdge.Item1.NextRelation != null)
-                //{
-                //    MessageBox.Show("cannot do that");
-                //    return;
-                //}
                 if (polygon.clickedVertex.ControlPointNext != null)
                 {
+                    if (polygon.clickedVertex.PrevRelation != null)
+                    {
+                        if (polygon.clickedVertex.PrevRelation.GetType() != typeof(G1Continuity))
+                            return;
+                        else
+                            polygon.Relations.Remove(polygon.clickedVertex.PrevRelation);
+                    }
                     C1Continuity relation = new C1Continuity(polygon.clickedVertex, polygon.clickedVertex.Prev);
                     polygon.clickedVertex.PrevRelation = relation;
                     polygon.clickedVertex.Prev.NextRelation = relation;
                     polygon.Relations.Add(relation);
-                    relation.CreateRelation();
+                    relation.CreateRelation(polygon);
                 }
                 else
                 {
+                    if (polygon.clickedVertex.NextRelation != null)
+                    {
+                        if (polygon.clickedVertex.NextRelation.GetType() != typeof(G1Continuity))
+                            return;
+                        else
+                            polygon.Relations.Remove(polygon.clickedVertex.NextRelation);
+                    }
                     C1Continuity relation = new C1Continuity(polygon.clickedVertex, polygon.clickedVertex.Next);
                     polygon.clickedVertex.NextRelation = relation;
                     polygon.clickedVertex.Next.PrevRelation = relation;
                     polygon.Relations.Add(relation);
-                    relation.CreateRelation();
+                    relation.CreateRelation(polygon);
                 }
 
                 picture.Invalidate();

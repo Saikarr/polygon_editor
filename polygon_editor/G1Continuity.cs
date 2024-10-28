@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,9 @@ namespace polygon_editor
             Vertex otherVertex = movingVertex == Vertex1 ? Vertex2 : Vertex1;
             Vertex controlPoint = Vertex1.ControlPointNext ?? Vertex1.ControlPointPrev;
 
+            // Calculate the initial distance between the vertices
+            double initialDistance = movingVertex.DistanceTo(otherVertex);
+
             // Check if the points are collinear
             if (!AreCollinear(otherVertex, movingVertex, controlPoint))
             {
@@ -35,10 +39,16 @@ namespace polygon_editor
                 {
                     int dx = controlPoint.X - movingVertex.X;
                     int dy = controlPoint.Y - movingVertex.Y;
-                    otherVertex.X = movingVertex.X + dx/2;
-                    otherVertex.Y = movingVertex.Y + dy/2;
+                    otherVertex.X = movingVertex.X + dx / 2;
+                    otherVertex.Y = movingVertex.Y + dy / 2;
                 }
-                
+
+                // Adjust the position of otherVertex to maintain the initial distance
+                double currentDistance = movingVertex.DistanceTo(otherVertex);
+                double scale = initialDistance / currentDistance;
+                otherVertex.X = (int)Math.Round(movingVertex.X + (otherVertex.X - movingVertex.X) * scale);
+                otherVertex.Y = (int)Math.Round(movingVertex.Y + (otherVertex.Y - movingVertex.Y) * scale);
+
                 if (otherVertex.Next == movingVertex && otherVertex.PrevRelation != null)
                 {
                     relationsStack.Push((otherVertex.PrevRelation, otherVertex));

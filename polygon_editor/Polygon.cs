@@ -8,7 +8,7 @@ using System.Windows.Forms.VisualStyles;
 
 namespace polygon_editor
 {
-    class Polygon
+    public class Polygon
     {
         public Point recent;
         public Vertex clickedVertex = null;

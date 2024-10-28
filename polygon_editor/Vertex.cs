@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace polygon_editor
 {
-    class Vertex
+    public class Vertex
     {
         public Point Point;
         public bool IsControlPoint = false;
